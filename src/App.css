@@ -1,0 +1,8 @@
+thead {
+  position: sticky;
+  top: 0;
+}
+
+.table-responsive {
+  overflow-x: visible !important;
+}

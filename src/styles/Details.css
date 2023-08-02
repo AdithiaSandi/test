@@ -1,0 +1,57 @@
+body:has(div.detail-container) {
+  background-color: #323539;
+}
+
+#root:has(div.detail-container) {
+  padding-top: 20vh;
+  display: flex;
+  justify-content: center;
+}
+
+.detail-container {
+  color: white;
+  background-color: #212529;
+  justify-content: center;
+  max-width: 850px;
+  gap: 1rem;
+  padding: 1rem 1rem;
+  border-radius: 1rem;
+}
+
+.data-container {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.character-image {
+  max-width: 300px;
+  max-height: 300px;
+}
+
+.character-details {
+  width: auto;
+}
+
+.status-row {
+  text-align: end;
+}
+
+@media screen and (max-width: 606px) {
+  .data-container {
+    display: block !important;
+  }
+
+  .character-image {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 425px) {
+  .character-image {
+    width: 100%;
+  }
+
+  .character-details {
+    width: 100%;
+  }
+}
