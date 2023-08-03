@@ -378,7 +378,7 @@ const Dashboard = () => {
             <Form.Group className="mb-3" controlId="buy">
               <Form.Label>Buy Price</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 onChange={(e) => {
                   e.preventDefault();
                   setAddItem((prev) => {
@@ -391,7 +391,7 @@ const Dashboard = () => {
             <Form.Group className="mb-3" controlId="sell">
               <Form.Label>Sell Price</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 onChange={(e) => {
                   e.preventDefault();
                   setAddItem((prev) => {
@@ -404,7 +404,7 @@ const Dashboard = () => {
             <Form.Group className="mb-3" controlId="stock">
               <Form.Label>Available Stock</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 onChange={(e) => {
                   e.preventDefault();
                   setAddItem((prev) => {
@@ -414,7 +414,7 @@ const Dashboard = () => {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="buy">
+            <Form.Group className="mb-3" controlId="imgUrl">
               <Form.Label>Image Url</Form.Label>
               <Form.Control
                 type="text"
@@ -464,7 +464,7 @@ const Dashboard = () => {
             <Form.Group className="mb-3" controlId="buy">
               <Form.Label>Buy Price</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 defaultValue={temp[active]?.buyPrice}
                 onChange={(e) => {
                   e.preventDefault();
@@ -476,7 +476,7 @@ const Dashboard = () => {
             <Form.Group className="mb-3" controlId="sell">
               <Form.Label>Sell Price</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 defaultValue={temp[active]?.sellPrice}
                 onChange={(e) => {
                   e.preventDefault();
@@ -488,7 +488,7 @@ const Dashboard = () => {
             <Form.Group className="mb-3" controlId="stock">
               <Form.Label>Available Stock</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 defaultValue={temp[active]?.stock}
                 onChange={(e) => {
                   e.preventDefault();
