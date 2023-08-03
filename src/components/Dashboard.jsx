@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Table } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { InputGroup, Table } from "react-bootstrap";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import Button from "react-bootstrap/Button";
@@ -22,6 +22,26 @@ const Dashboard = () => {
 
   const [active, setActive] = useState({});
 
+  const [addItem, setAddItem] = useState({
+    name: "",
+    imageUrl: "",
+    buyPrice: 0,
+    sellPrice: 0,
+    stock: 0,
+  });
+  const [add, setAdd] = useState(false);
+  const closeAdd = () => setAdd(false);
+  const showAdd = () => setAdd(true);
+  const handleAdd = (e) => {
+    e.preventDefault();
+    const newTemp = [...temp];
+    newTemp.unshift(addItem);
+    localStorage.setItem("database", JSON.stringify(newTemp));
+    setTemp(newTemp);
+    setShown(newTemp);
+    closeAdd();
+  };
+
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (index) => {
@@ -40,7 +60,7 @@ const Dashboard = () => {
     JSON.parse(localStorage.getItem("database")) ||
       Array(42)
         .fill({
-          name: "",
+          name: "barang",
           imageUrl:
             "http://nutech-integrasi.com/wp-content/uploads/2019/09/Logo-Nutech-ok.png",
           buyPrice: 5000,
@@ -52,6 +72,8 @@ const Dashboard = () => {
             (item.name = { ...item, name: `Barang ${index + 1}` })
         )
   );
+
+  const [shown, setShown] = useState(temp);
 
   const [controlledBuyPrice, setControlledBuyPrice] = useState();
   const [controlledSellPrice, setControlledSellPrice] = useState();
@@ -71,23 +93,79 @@ const Dashboard = () => {
     e.preventDefault();
     const newTemp = [...temp];
     newTemp.splice(active, 1);
+    localStorage.setItem("database", JSON.stringify(newTemp));
     setTemp(newTemp);
+    setShown(newTemp);
     closeWarning();
   };
 
   const handleLogout = (e) => {
     e.preventDefault();
     dispatch(updateDatabase(temp));
-    localStorage.setItem("database", JSON.stringify(temp));
     dispatch(removeToken());
     navigate("/");
   };
 
+  const [exist, setExist] = useState();
+  const [empty, setEmpty] = useState();
+  const checkExist = (e) => {
+    e.preventDefault();
+    e.target.value === "" ? setExist(true) : null;
+    const names = temp.map((item) => item.name);
+    setExist(names.includes(e.target.value));
+  };
+
+  useEffect(() => {
+    addItem.name === "" ? setEmpty(true) : setEmpty(false);
+  }, [addItem]);
+
   return (
     <div>
-      <h3>
-        <span>{token}</span>
-        <button onClick={(e) => handleLogout(e)}>Logout</button>
+      <h3
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-around",
+          alignItems: "left",
+          marginTop: "1rem",
+        }}
+      >
+        <div className="left-container">
+          <span>{token}</span>
+          <button onClick={(e) => handleLogout(e)}>Logout</button>
+        </div>
+        <div className="search-container">
+          <Form
+            className="d-flex"
+            style={{
+              width: "500px",
+            }}
+          >
+            <Form.Control
+              type="search"
+              placeholder="Search"
+              className="me-2"
+              aria-label="Search"
+              onChange={(e) => {
+                e.preventDefault();
+                const newShown = temp.filter((obj) =>
+                  obj.name.includes(e.target.value)
+                );
+                setShown(newShown);
+              }}
+            />
+          </Form>
+        </div>
+        <Button
+          className="add-btn"
+          variant="success"
+          style={{
+            width: "200px",
+          }}
+          onClick={() => showAdd()}
+        >
+          Add Items
+        </Button>
       </h3>
 
       <div className="data-table">
@@ -102,8 +180,8 @@ const Dashboard = () => {
             color: "white",
           }}
         >
-          <thead className="position-sticky">
-            <tr>
+          <thead>
+            <tr className="position-sticky" style={{ top: 0 }}>
               <th>Product Name</th>
               <th>Buy Price</th>
               <th>Sell Price</th>
@@ -111,7 +189,7 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {temp.map((item, index) => {
+            {shown.map((item, index) => {
               if (
                 index >= (currentPage - 1) * limit &&
                 index < (currentPage - 1) * limit + limit
@@ -242,6 +320,7 @@ const Dashboard = () => {
         </Table>
       </div>
 
+      {/* PAGINATION CONTROL */}
       <div className="controls">
         <div>
           <label htmlFor="cars">Per Page</label>
@@ -260,13 +339,102 @@ const Dashboard = () => {
           </button>
         )}
         <span>{currentPage}</span>
-        {currentPage == Math.ceil(temp.length / limit) ? null : (
+        {currentPage == Math.ceil(shown.length / limit) ? null : (
           <button id="next" onClick={(e) => move(e.target.id)}>
             next
           </button>
         )}
       </div>
 
+      {/* ADD ITEM MODAL */}
+      <Modal show={add} onHide={closeAdd} className="modal-edit">
+        <Modal.Header closeButton>
+          <Modal.Title>{temp[active]?.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={exist || empty ? null : handleAdd}>
+            <Form.Group className="mb-3" controlId="buy">
+              <Form.Label>Name</Form.Label>
+              <InputGroup hasValidation>
+                <Form.Control
+                  type="text"
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setAddItem((prev) => {
+                      return { ...prev, name: e.target.value };
+                    });
+                    checkExist(e);
+                  }}
+                  isInvalid={exist || empty}
+                />
+                {exist || empty ? (
+                  <Form.Control.Feedback type="invalid" tooltip>
+                    {empty ? "Field Required" : "Item Name Already Exist"}
+                  </Form.Control.Feedback>
+                ) : null}
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="buy">
+              <Form.Label>Buy Price</Form.Label>
+              <Form.Control
+                type="text"
+                onChange={(e) => {
+                  e.preventDefault();
+                  setAddItem((prev) => {
+                    return { ...prev, buyPrice: parseInt(e.target.value) };
+                  });
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="sell">
+              <Form.Label>Sell Price</Form.Label>
+              <Form.Control
+                type="text"
+                onChange={(e) => {
+                  e.preventDefault();
+                  setAddItem((prev) => {
+                    return { ...prev, sellPrice: parseInt(e.target.value) };
+                  });
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="stock">
+              <Form.Label>Available Stock</Form.Label>
+              <Form.Control
+                type="text"
+                onChange={(e) => {
+                  e.preventDefault();
+                  setAddItem((prev) => {
+                    return { ...prev, stock: parseInt(e.target.value) };
+                  });
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="buy">
+              <Form.Label>Image Url</Form.Label>
+              <Form.Control
+                type="text"
+                onChange={(e) => {
+                  e.preventDefault();
+                  setAddItem((prev) => {
+                    return { ...prev, imageUrl: e.target.value };
+                  });
+                }}
+              />
+            </Form.Group>
+
+            <Button variant="primary" type="submit" disabled={exist || empty}>
+              Submit
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* EDIT DATA MODAL */}
       <Modal show={show} onHide={handleClose} className="modal-edit">
         <Modal.Header closeButton>
           <Modal.Title>{temp[active]?.name}</Modal.Title>
@@ -336,6 +504,7 @@ const Dashboard = () => {
         </Modal.Body>
       </Modal>
 
+      {/* DELETE WARNING MODAL */}
       <Modal show={warning} onHide={closeWarning} className="modal-warning">
         <Modal.Header closeButton>
           <Modal.Title>Warning !</Modal.Title>
