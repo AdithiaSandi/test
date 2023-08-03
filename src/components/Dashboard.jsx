@@ -25,9 +25,9 @@ const Dashboard = () => {
   const [addItem, setAddItem] = useState({
     name: "",
     imageUrl: "",
-    buyPrice: 0,
-    sellPrice: 0,
-    stock: 0,
+    buyPrice: NaN,
+    sellPrice: NaN,
+    stock: NaN,
   });
   const [add, setAdd] = useState(false);
   const closeAdd = () => setAdd(false);
@@ -39,6 +39,13 @@ const Dashboard = () => {
     localStorage.setItem("database", JSON.stringify(newTemp));
     setTemp(newTemp);
     setShown(newTemp);
+    setAddItem({
+      name: "",
+      imageUrl: "",
+      buyPrice: NaN,
+      sellPrice: NaN,
+      stock: NaN,
+    });
     closeAdd();
   };
 
@@ -79,6 +86,28 @@ const Dashboard = () => {
   const [controlledSellPrice, setControlledSellPrice] = useState();
   const [controlledStock, setControlledStock] = useState();
 
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    const newTemp = temp.map((obj, index) => {
+      // 👇️ if id equals 2, update country property
+      if (index === active) {
+        return {
+          ...obj,
+          buyPrice: controlledBuyPrice || obj.buyPrice,
+          sellPrice: controlledSellPrice || obj.sellPrice,
+          stock: controlledStock || obj.stock,
+        };
+      }
+
+      // 👇️ otherwise return the object as is
+      return obj;
+    });
+    localStorage.setItem("database", JSON.stringify(newTemp));
+    setTemp(newTemp);
+    setShown(newTemp);
+    handleClose();
+  };
+
   const move = (action) => {
     if (action === "next") {
       setCurrentPage((prev) => prev + 1);
@@ -118,6 +147,16 @@ const Dashboard = () => {
   useEffect(() => {
     addItem.name === "" ? setEmpty(true) : setEmpty(false);
   }, [addItem]);
+
+  useEffect(() => {
+    if (!active) {
+      setControlledBuyPrice(temp[active].buyPrice);
+      setControlledSellPrice(temp[active].sellPrice);
+      setControlledStock(temp[active].stock);
+    } else {
+      return;
+    }
+  }, [show]);
 
   return (
     <div>
@@ -352,7 +391,18 @@ const Dashboard = () => {
           <Modal.Title>{temp[active]?.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={exist || empty ? null : handleAdd}>
+          <Form
+            onSubmit={
+              exist || empty
+                ? null
+                : isNaN(addItem.buyPrice) ||
+                  isNaN(addItem.sellPrice) ||
+                  isNaN(addItem.stock) ||
+                  addItem.imageUrl == ""
+                ? null
+                : handleAdd
+            }
+          >
             <Form.Group className="mb-3" controlId="buy">
               <Form.Label>Name</Form.Label>
               <InputGroup hasValidation>
@@ -367,9 +417,11 @@ const Dashboard = () => {
                   }}
                   isInvalid={exist || empty}
                 />
-                {exist || empty ? (
+                {exist || addItem.name == "" ? (
                   <Form.Control.Feedback type="invalid" tooltip>
-                    {empty ? "Field Required" : "Item Name Already Exist"}
+                    {addItem.name == ""
+                      ? "Field Required"
+                      : "Item Name Already Exist"}
                   </Form.Control.Feedback>
                 ) : null}
               </InputGroup>
@@ -427,7 +479,18 @@ const Dashboard = () => {
               />
             </Form.Group>
 
-            <Button variant="primary" type="submit" disabled={exist || empty}>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={
+                exist ||
+                empty ||
+                isNaN(addItem.buyPrice) ||
+                isNaN(addItem.sellPrice) ||
+                isNaN(addItem.stock) ||
+                addItem.imageUrl == ""
+              }
+            >
               Submit
             </Button>
           </Form>
@@ -441,25 +504,13 @@ const Dashboard = () => {
         </Modal.Header>
         <Modal.Body>
           <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const newTemp = temp.map((obj, index) => {
-                // 👇️ if id equals 2, update country property
-                if (index === active) {
-                  return {
-                    ...obj,
-                    buyPrice: controlledBuyPrice,
-                    sellPrice: controlledSellPrice,
-                    stock: controlledStock,
-                  };
-                }
-
-                // 👇️ otherwise return the object as is
-                return obj;
-              });
-              setTemp(newTemp);
-              handleClose();
-            }}
+            onSubmit={
+              isNaN(controlledBuyPrice) ||
+              isNaN(controlledBuyPrice) ||
+              isNaN(controlledBuyPrice)
+                ? null
+                : handleUpdate
+            }
           >
             <Form.Group className="mb-3" controlId="buy">
               <Form.Label>Buy Price</Form.Label>
@@ -497,7 +548,17 @@ const Dashboard = () => {
               />
             </Form.Group>
 
-            <Button variant="primary" type="submit">
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={
+                isNaN(controlledBuyPrice) ||
+                isNaN(controlledBuyPrice) ||
+                isNaN(controlledBuyPrice)
+                  ? true
+                  : false
+              }
+            >
               Submit
             </Button>
           </Form>
