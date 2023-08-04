@@ -86,6 +86,8 @@ const Dashboard = () => {
   const [controlledSellPrice, setControlledSellPrice] = useState();
   const [controlledStock, setControlledStock] = useState();
 
+  console.log(controlledBuyPrice, controlledSellPrice, controlledStock);
+
   const handleUpdate = (e) => {
     e.preventDefault();
     const newTemp = temp.map((obj, index) => {
@@ -505,9 +507,9 @@ const Dashboard = () => {
         <Modal.Body>
           <Form
             onSubmit={
-              isNaN(controlledBuyPrice) ||
-              isNaN(controlledBuyPrice) ||
-              isNaN(controlledBuyPrice)
+              !isNaN(controlledBuyPrice) ||
+              !isNaN(controlledBuyPrice) ||
+              !isNaN(controlledBuyPrice)
                 ? null
                 : handleUpdate
             }
@@ -553,8 +555,8 @@ const Dashboard = () => {
               type="submit"
               disabled={
                 isNaN(controlledBuyPrice) ||
-                isNaN(controlledBuyPrice) ||
-                isNaN(controlledBuyPrice)
+                isNaN(controlledSellPrice) ||
+                isNaN(controlledStock)
                   ? true
                   : false
               }
